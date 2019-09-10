@@ -37,6 +37,7 @@ static char CharPiece[] = {'.', 'X', 'O'};
 
 int main(int argc, char* argv[])
 {
+    // initialize
     gpMasterBoard = (int*) malloc(sizeof(int) * NUM_OF_COLUMN * NUM_OF_ROW);
     InitializeBoard(gpMasterBoard);
     PlacePiece(gpMasterBoard, initialBlack0);
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
     PlacePiece(gpMasterBoard, initialWhite1);
     PrintBoard(gpMasterBoard);
 
+    // end
     free(gpMasterBoard);
     return 0;
 }
