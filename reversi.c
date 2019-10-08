@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
 
     // end
     free(gpMasterBoard);
-    printf("End\n");
     return 0;
 }
 
