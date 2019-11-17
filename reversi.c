@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
     PrintBoard(gpMasterBoard);
     Piece turnPiece;
     GetUserTurnPiece(gpMasterBoard, &turnPiece);
+    printf("color %d, X position %d, Y position %d\n", turnPiece.color, turnPiece.position.X, turnPiece.position.Y);
     PlacePiece(gpMasterBoard, turnPiece, NORMAL);
     PrintBoard(gpMasterBoard);
 
@@ -125,7 +126,7 @@ bool IsPieceToBeFlipped(int *pBoard, Piece piece)
 {
     int indexDirection;
     bool isCheckCompleted;
-    bool isPieceFlipped = false;
+    bool isPieceToBeFlipped = false;
     Position positionToCheck;
     PieceType colorToCheck = (piece.color == BLACK)? WHITE: BLACK;
     for (indexDirection = 0; indexDirection < NUM_DIRECTIONS; indexDirection++)
@@ -142,7 +143,7 @@ bool IsPieceToBeFlipped(int *pBoard, Piece piece)
             {
                 if (pBoard[positionToCheck.X + positionToCheck.Y * NUM_OF_COLUMN] == colorToCheck)
                 {
-                    isPieceFlipped = true;
+                    isPieceToBeFlipped = true;
                     isCheckCompleted = true;
                 }
             }
