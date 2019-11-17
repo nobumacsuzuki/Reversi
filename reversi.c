@@ -30,6 +30,7 @@ static char CharPiece[] = {'.', 'X', 'O'};
 int* gpMasterBoard;
 
 void InitializeBoard(int* pBoard);
+void PutInitialPieces();
 void PrintBoard(int* pBorard);
 bool PlacePiece(int* pBoard, Piece piece);
 PieceType GetBoardPieceInformation(int* pBoard, Position position);
@@ -44,11 +45,8 @@ int main(int argc, char* argv[])
     // initialize
     gpMasterBoard = (int*) malloc(sizeof(int) * NUM_OF_COLUMN * NUM_OF_ROW);
     InitializeBoard(gpMasterBoard);
-    PlacePiece(gpMasterBoard, initialBlack0);
-    PlacePiece(gpMasterBoard, initialBlack1);
-    PlacePiece(gpMasterBoard, initialWhite0);
-    PlacePiece(gpMasterBoard, initialWhite1);
     PrintBoard(gpMasterBoard);
+    PutInitialPieces();
 
     // end
     free(gpMasterBoard);
@@ -98,4 +96,12 @@ bool PlacePiece(int* pBoard, Piece piece)
 PieceType GetBoardPieceInformation(int* pBoard, Position position)
 {
     return *(pBoard + position.Y * NUM_OF_COLUMN + position.X );
+}
+
+void PutInitialPieces()
+{
+    PlacePiece(gpMasterBoard, initialBlack0);
+    PlacePiece(gpMasterBoard, initialBlack1);
+    PlacePiece(gpMasterBoard, initialWhite0);
+    PlacePiece(gpMasterBoard, initialWhite1);
 }
