@@ -1,13 +1,17 @@
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define NUM_OF_COLUMN 8
 #define NUM_OF_ROW 8
-#define NO_PIECE 0
-#define BLACK_PIECE 1
-#define WHITE_PIECE 2
-#define TRUE 0
-#define FALSE -1
+
+typedef enum _PIECE_TYPE
+{
+    EMPTY = 0,
+    WHITE,
+    BLACK
+} PieceType;
 
 typedef struct _POSITION
 {
@@ -18,22 +22,22 @@ typedef struct _POSITION
 typedef struct _PIECE
 {
     Position position;
-    int color;
+    PieceType color;
 } Piece;
+
+static char CharPiece[] = {'.', 'X', 'O'};
 
 int* gpMasterBoard;
 
 void InitializeBoard(int* pBoard);
 void PrintBoard(int* pBorard);
-int PlacePiece(int* pBoard, Piece piece);
-int GetBoardPieceInformation(int* pBoard, Position position);
+bool PlacePiece(int* pBoard, Piece piece);
+PieceType GetBoardPieceInformation(int* pBoard, Position position);
 
-static Piece initialBlack0 = {{3,3}, BLACK_PIECE};
-static Piece initialBlack1 = {{4,4}, BLACK_PIECE};
-static Piece initialWhite0 = {{3,4}, WHITE_PIECE};
-static Piece initialWhite1 = {{4,3}, WHITE_PIECE};
-
-static char CharPiece[] = {'.', 'X', 'O'};
+static Piece initialBlack0 = {{3,3}, BLACK};
+static Piece initialBlack1 = {{4,4}, BLACK};
+static Piece initialWhite0 = {{3,4}, WHITE};
+static Piece initialWhite1 = {{4,3}, WHITE};
 
 int main(int argc, char* argv[])
 {
@@ -58,7 +62,7 @@ void InitializeBoard(int* pBoard)
     {
         for(indexXPosition = 0; indexXPosition < NUM_OF_COLUMN; indexXPosition++)
         {
-            *(pBoard + indexYPosition * NUM_OF_COLUMN + indexXPosition) = NO_PIECE;
+            *(pBoard + indexYPosition * NUM_OF_COLUMN + indexXPosition) = EMPTY;
         }
     }
 }
@@ -80,19 +84,18 @@ void PrintBoard(int* pBoard)
 
 }
 
-int PlacePiece(int* pBoard, Piece piece)
+bool PlacePiece(int* pBoard, Piece piece)
 {
-    if (GetBoardPieceInformation(pBoard, piece.position) != NO_PIECE)
-        return FALSE;
+    if (GetBoardPieceInformation(pBoard, piece.position) != EMPTY)
+        return false;
     else
     {
         *(pBoard + piece.position.Y * NUM_OF_COLUMN + piece.position.X) = piece.color;
-        return TRUE;
+        return true;
     }
-    
 }
 
-int GetBoardPieceInformation(int* pBoard, Position position)
+PieceType GetBoardPieceInformation(int* pBoard, Position position)
 {
     return *(pBoard + position.Y * NUM_OF_COLUMN + position.X );
 }
