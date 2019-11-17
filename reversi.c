@@ -2,43 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-#define NUM_OF_COLUMN 8
-#define NUM_OF_ROW 8
-
-typedef enum _PIECE_TYPE
-{
-    EMPTY = 0,
-    WHITE,
-    BLACK
-} PieceType;
-
-typedef struct _POSITION
-{
-    int X;
-    int Y;
-} Position;
-
-typedef struct _PIECE
-{
-    Position position;
-    PieceType color;
-} Piece;
-
-static char CharPiece[] = {'.', 'X', 'O'};
-
-int* gpMasterBoard;
-
-void InitializeBoard(int* pBoard);
-void PutInitialPieces();
-void PrintBoard(int* pBorard);
-bool PlacePiece(int* pBoard, Piece piece);
-PieceType GetBoardPieceInformation(int* pBoard, Position position);
-
-static Piece initialBlack0 = {{3,3}, BLACK};
-static Piece initialBlack1 = {{4,4}, BLACK};
-static Piece initialWhite0 = {{3,4}, WHITE};
-static Piece initialWhite1 = {{4,3}, WHITE};
+#include "reversi.h"
 
 int main(int argc, char* argv[])
 {
@@ -46,11 +10,52 @@ int main(int argc, char* argv[])
     gpMasterBoard = (int*) malloc(sizeof(int) * NUM_OF_COLUMN * NUM_OF_ROW);
     InitializeBoard(gpMasterBoard);
     PrintBoard(gpMasterBoard);
-    PutInitialPieces();
+    Piece turnPiece;
+    GetUserTurnPiece(gpMasterBoard, &turnPiece);
+    PlacePiece(gpMasterBoard, turnPiece, NORMAL);
+    PrintBoard(gpMasterBoard);
 
     // end
     free(gpMasterBoard);
     return 0;
+}
+
+void GetUserTurnPiece(int* pBoard, Piece* pPiece)
+{
+    int color, positionX, positionY;
+    bool IsUserOperationSuccessful = false;
+    while (!IsUserOperationSuccessful)
+    {
+        printf("color (black = 1, whilte = 2): ");
+        color = getchar();
+        getchar();
+        printf("X position: ");
+        positionX = getchar();
+        getchar();
+        printf("Y position: ");
+        positionY = getchar();
+        getchar();
+        color -= ASCII_CODE_START_OF_ZERO;
+        positionX -= ASCII_CODE_START_OF_ZERO;
+        positionY -= ASCII_CODE_START_OF_ZERO;
+        // the entry validity check
+        if (color != BLACK && color != WHITE)
+        {
+            IsUserOperationSuccessful = false;
+        }
+        else if (positionX < 0 || positionY < 0 || positionX > NUM_OF_COLUMN || positionY > NUM_OF_ROW)
+        {
+            IsUserOperationSuccessful = false;
+        }
+        else
+        {
+            IsUserOperationSuccessful = true;
+        }
+    }
+    pPiece->position.X = positionX;
+    pPiece->position.Y = positionY;
+    pPiece->color = color;
+
 }
 
 void InitializeBoard(int* pBoard)
@@ -63,6 +68,15 @@ void InitializeBoard(int* pBoard)
             *(pBoard + indexYPosition * NUM_OF_COLUMN + indexXPosition) = EMPTY;
         }
     }
+    PutInitialPieces();
+}
+
+void PutInitialPieces()
+{
+    PlacePiece(gpMasterBoard, initialBlack0, INITIAL);
+    PlacePiece(gpMasterBoard, initialBlack1, INITIAL);
+    PlacePiece(gpMasterBoard, initialWhite0, INITIAL);
+    PlacePiece(gpMasterBoard, initialWhite1, INITIAL);
 }
 
 void PrintBoard(int* pBoard)
@@ -75,33 +89,64 @@ void PrintBoard(int* pBoard)
         for(indexXPosition = 0; indexXPosition < NUM_OF_COLUMN; indexXPosition++)
         {
             printf("%c ", 
-            *(CharPiece + *(pBoard + indexYPosition * NUM_OF_COLUMN + indexXPosition)));
+            CharPiece[pBoard[indexYPosition * NUM_OF_COLUMN + indexXPosition]]);
         }
         printf("\n");
     }
-
 }
 
-bool PlacePiece(int* pBoard, Piece piece)
+bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
 {
     if (GetBoardPieceInformation(pBoard, piece.position) != EMPTY)
         return false;
+    if (placeMode == INITIAL)
+    {
+        pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
+        return true;
+    }
     else
     {
-        *(pBoard + piece.position.Y * NUM_OF_COLUMN + piece.position.X) = piece.color;
-        return true;
+        if (IsPieceToBeFlipped(pBoard, piece))
+        {
+            pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
+            return true;
+        }
+        else 
+            return false;
     }
 }
 
 PieceType GetBoardPieceInformation(int* pBoard, Position position)
 {
-    return *(pBoard + position.Y * NUM_OF_COLUMN + position.X );
+    return pBoard[position.Y * NUM_OF_COLUMN + position.X];
 }
 
-void PutInitialPieces()
+bool IsPieceToBeFlipped(int *pBoard, Piece piece)
 {
-    PlacePiece(gpMasterBoard, initialBlack0);
-    PlacePiece(gpMasterBoard, initialBlack1);
-    PlacePiece(gpMasterBoard, initialWhite0);
-    PlacePiece(gpMasterBoard, initialWhite1);
+    int indexDirection;
+    bool isCheckCompleted;
+    bool isPieceFlipped = false;
+    Position positionToCheck;
+    PieceType colorToCheck = (piece.color == BLACK)? WHITE: BLACK;
+    for (indexDirection = 0; indexDirection < NUM_DIRECTIONS; indexDirection++)
+    {
+        isCheckCompleted = true;
+        positionToCheck = piece.position;
+        while(!isCheckCompleted)
+        {
+            positionToCheck.X += gDirections[indexDirection].dX;
+            positionToCheck.Y += gDirections[indexDirection].dY;
+            if (positionToCheck.X < 0 || positionToCheck.X > NUM_OF_COLUMN || positionToCheck.Y < 0 || positionToCheck.Y > NUM_OF_ROW)
+                    isCheckCompleted = true;
+            else
+            {
+                if (pBoard[positionToCheck.X + positionToCheck.Y * NUM_OF_COLUMN] == colorToCheck)
+                {
+                    isPieceFlipped = true;
+                    isCheckCompleted = true;
+                }
+            }
+        }
+    }
+    return isPieceFlipped;
 }
