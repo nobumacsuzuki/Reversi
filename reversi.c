@@ -11,10 +11,13 @@ int main(int argc, char* argv[])
     InitializeBoard(gpMasterBoard);
     PrintBoard(gpMasterBoard);
     Piece turnPiece;
-    GetUserTurnPiece(gpMasterBoard, &turnPiece);
-    printf("color %d, X position %d, Y position %d\n", turnPiece.color, turnPiece.position.X, turnPiece.position.Y);
-    PlacePiece(gpMasterBoard, turnPiece, NORMAL);
-    PrintBoard(gpMasterBoard);
+    while (true)
+    {
+        GetUserTurnPiece(gpMasterBoard, &turnPiece);
+        printf("color %d, X position %d, Y position %d\n", turnPiece.color, turnPiece.position.X, turnPiece.position.Y);
+        PlacePiece(gpMasterBoard, turnPiece, NORMAL);
+        PrintBoard(gpMasterBoard);
+    }
 
     // end
     free(gpMasterBoard);
@@ -44,7 +47,7 @@ void GetUserTurnPiece(int* pBoard, Piece* pPiece)
         {
             IsUserOperationSuccessful = false;
         }
-        else if (positionX < 0 || positionY < 0 || positionX > NUM_OF_COLUMN || positionY > NUM_OF_ROW)
+        else if (positionX < 0 || positionY < 0 || positionX > (NUM_OF_COLUMN  - 1) || positionY > (NUM_OF_ROW - 1))
         {
             IsUserOperationSuccessful = false;
         }
@@ -56,7 +59,6 @@ void GetUserTurnPiece(int* pBoard, Piece* pPiece)
     pPiece->position.X = positionX;
     pPiece->position.Y = positionY;
     pPiece->color = color;
-
 }
 
 void InitializeBoard(int* pBoard)
@@ -99,7 +101,10 @@ void PrintBoard(int* pBoard)
 bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
 {
     if (GetBoardPieceInformation(pBoard, piece.position) != EMPTY)
+    {
+        printf("the place is not empty\n");        
         return false;
+    }
     if (placeMode == INITIAL)
     {
         pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
@@ -124,30 +129,66 @@ PieceType GetBoardPieceInformation(int* pBoard, Position position)
 
 bool IsPieceToBeFlipped(int *pBoard, Piece piece)
 {
+    printf("IsPieceToBeFlipped called\n");
     int indexDirection;
-    bool isCheckCompleted;
+    bool isCheckCompleted = false;
     bool isPieceToBeFlipped = false;
+    bool isOpponentColorBetween = false;
     Position positionToCheck;
-    PieceType colorToCheck = (piece.color == BLACK)? WHITE: BLACK;
+    PieceType opponentColor = (piece.color == BLACK)? WHITE: BLACK;
+    PieceType colorPositionToCheck;
     for (indexDirection = 0; indexDirection < NUM_DIRECTIONS; indexDirection++)
     {
-        isCheckCompleted = true;
+        isCheckCompleted = false;
+        isOpponentColorBetween = false;
         positionToCheck = piece.position;
         while(!isCheckCompleted)
         {
             positionToCheck.X += gDirections[indexDirection].dX;
             positionToCheck.Y += gDirections[indexDirection].dY;
-            if (positionToCheck.X < 0 || positionToCheck.X > NUM_OF_COLUMN || positionToCheck.Y < 0 || positionToCheck.Y > NUM_OF_ROW)
-                    isCheckCompleted = true;
+            printf("check position X: %d, position Y: %d\n", 
+                positionToCheck.X, 
+                positionToCheck.Y);
+            if (positionToCheck.X < 0 || positionToCheck.X > (NUM_OF_COLUMN - 1) || positionToCheck.Y < 0 || positionToCheck.Y > (NUM_OF_ROW - 1))
+            {
+                printf("out of board, stop\n");
+                isCheckCompleted = true;
+            }
             else
             {
-                if (pBoard[positionToCheck.X + positionToCheck.Y * NUM_OF_COLUMN] == colorToCheck)
+                colorPositionToCheck = GetBoardPieceInformation(pBoard, positionToCheck);
+                printf("check position X: %d, position Y: %d. color:%d\n", 
+                        positionToCheck.X, 
+                        positionToCheck.Y, 
+                        colorPositionToCheck);
+                // stop the check if the position is out of the board
+                // stop the check if the position is empty
+                if (colorPositionToCheck == EMPTY)
                 {
-                    isPieceToBeFlipped = true;
+                    printf("empty, stop\n");
                     isCheckCompleted = true;
+                }
+                // stop the check if the position color is same as the piece to be placed
+                else if (colorPositionToCheck == piece.color)
+                {
+                    printf("same color, stop\n");
+                    if (isOpponentColorBetween)
+                        isPieceToBeFlipped = true;
+                    isCheckCompleted = true;
+                }
+                // flag isOpponentColorBetween if there is the opponent color piece
+                else
+                {
+                    printf("opponent color, continue\n");
+                    isOpponentColorBetween = true;
                 }
             }
         }
     }
-    return isPieceFlipped;
+    return isPieceToBeFlipped;
+}
+
+void FlipPieces(int* pBoard, Piece piece)
+{
+
 }
