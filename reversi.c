@@ -98,6 +98,11 @@ void PrintBoard(int* pBoard)
     }
 }
 
+void SetPiece(int* pBoard, Piece piece)
+{
+        pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
+}
+
 bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
 {
     if (GetBoardPieceInformation(pBoard, piece.position) != EMPTY)
@@ -107,12 +112,12 @@ bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
     }
     if (placeMode == INITIAL)
     {
-        pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
+        SetPiece(pBoard, piece);
         return true;
     }
     else
     {
-        if (IsPieceToBeFlipped(pBoard, piece))
+        if (CheckAndFlip(pBoard, piece, CHECK_AND_FLIP))
         {
             pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
             return true;
@@ -127,19 +132,22 @@ PieceType GetBoardPieceInformation(int* pBoard, Position position)
     return pBoard[position.Y * NUM_OF_COLUMN + position.X];
 }
 
-bool IsPieceToBeFlipped(int *pBoard, Piece piece)
+bool CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode)
 {
-    printf("IsPieceToBeFlipped called\n");
+    printf("ChekAndFliop called\n");
     int indexDirection;
     bool isCheckCompleted = false;
     bool isPieceToBeFlipped = false;
     bool isOpponentColorBetween = false;
+    bool ifFlip = false;
     Position positionToCheck;
     PieceType opponentColor = (piece.color == BLACK)? WHITE: BLACK;
     PieceType colorPositionToCheck;
+    Direction* pDirectionToFlip;
     for (indexDirection = 0; indexDirection < NUM_DIRECTIONS; indexDirection++)
     {
         isCheckCompleted = false;
+        ifFlip = false;
         isOpponentColorBetween = false;
         positionToCheck = piece.position;
         while(!isCheckCompleted)
@@ -173,7 +181,10 @@ bool IsPieceToBeFlipped(int *pBoard, Piece piece)
                 {
                     printf("same color, stop\n");
                     if (isOpponentColorBetween)
+                    {
                         isPieceToBeFlipped = true;
+                        ifFlip = true;
+                    }
                     isCheckCompleted = true;
                 }
                 // flag isOpponentColorBetween if there is the opponent color piece
@@ -183,12 +194,30 @@ bool IsPieceToBeFlipped(int *pBoard, Piece piece)
                     isOpponentColorBetween = true;
                 }
             }
+            if (flipMode == CHECK_AND_FLIP)
+            {
+                if (ifFlip)
+                {
+                    pDirectionToFlip = &gDirections[indexDirection];
+                    FlipPiece(pBoard, piece, pDirectionToFlip);
+                    ifFlip = false;
+                }
+            }
         }
     }
     return isPieceToBeFlipped;
 }
 
-void FlipPieces(int* pBoard, Piece piece)
+void FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip)
 {
-
+    Piece flippedPiece;
+    flippedPiece.position.X = piece.position.X + pDirectionToFlip->dX;
+    flippedPiece.position.Y = piece.position.Y + pDirectionToFlip->dY;
+    flippedPiece.color = piece.color;
+    while(GetBoardPieceInformation(pBoard, flippedPiece.position) != piece.color)
+    {
+        SetPiece(pBoard, flippedPiece);
+        flippedPiece.position.X += pDirectionToFlip->dX;
+        flippedPiece.position.Y += pDirectionToFlip->dY;
+    }
 }

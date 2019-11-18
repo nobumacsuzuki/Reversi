@@ -18,6 +18,13 @@ typedef enum _PLACE_MODE
     NORMAL
 } PlaceMode;
 
+typedef enum _FLIP_MODE
+{
+    CHECK_ONLY = 0,
+    CHECK_AND_FLIP
+} FlipMode;
+
+
 typedef struct _POSITION
 {
     int X;
@@ -43,10 +50,12 @@ int* gpMasterBoard;
 void InitializeBoard(int* pBoard);
 void PutInitialPieces();
 void PrintBoard(int* pBorard);
+void SetPiece(int* pBoard, Piece piece);
 bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode);
 PieceType GetBoardPieceInformation(int* pBoard, Position position);
-bool IsPieceToBeFlipped(int *pBoard, Piece piece);
+bool CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode);
 void GetUserTurnPiece(int* pBoard, Piece* pPiece);
+void FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip);
 
 Piece initialBlack0 = {{3,3}, BLACK};
 Piece initialBlack1 = {{4,4}, BLACK};
