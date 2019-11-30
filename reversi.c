@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
         printf("color %d, X position %d, Y position %d\n", turnPiece.color, turnPiece.position.X, turnPiece.position.Y);
         PlacePiece(gpMasterBoard, turnPiece, NORMAL);
         PrintBoard(gpMasterBoard);
+        PrintCount(gpMasterBoard);
     }
 
     // end
@@ -30,7 +31,7 @@ void GetUserTurnPiece(int* pBoard, Piece* pPiece)
     bool IsUserOperationSuccessful = false;
     while (!IsUserOperationSuccessful)
     {
-        printf("color (black = 1, whilte = 2): ");
+        printf("color (%c = %d, %c = %d): ", CharPiece[BLACK], BLACK, CharPiece[WHITE], WHITE);
         color = getchar();
         getchar();
         printf("X position: ");
@@ -98,6 +99,13 @@ void PrintBoard(int* pBoard)
     }
 }
 
+void PrintCount(int* pBoard)
+{
+    int countWhite = CountPiece(pBoard, WHITE);
+    int countBlack = CountPiece(pBoard, BLACK);
+    printf("%c: %d vs %c: %d\n", CharPiece[BLACK], countBlack, CharPiece[WHITE], countWhite);
+}
+
 void SetPiece(int* pBoard, Piece piece)
 {
         pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
@@ -105,6 +113,7 @@ void SetPiece(int* pBoard, Piece piece)
 
 bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
 {
+    int resultFlipcount;
     if (GetBoardPieceInformation(pBoard, piece.position) != EMPTY)
     {
         printf("the place is not empty\n");        
@@ -117,9 +126,10 @@ bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
     }
     else
     {
-        if (CheckAndFlip(pBoard, piece, CHECK_AND_FLIP))
+        if ((resultFlipcount = CheckAndFlip(pBoard, piece, CHECK_AND_FLIP)) != 0)
         {
             pBoard[piece.position.X + piece.position.Y * NUM_OF_COLUMN] = piece.color;
+            printf("%d pieces are flipped\n", resultFlipcount);
             return true;
         }
         else 
@@ -127,14 +137,33 @@ bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode)
     }
 }
 
+int CountPiece(int* pBoard, PieceType color)
+{
+    int returnCount = 0;
+    int x_pos, y_pos;
+    Position position;
+    for(y_pos = 0; y_pos < NUM_OF_ROW; y_pos++)
+    {
+        for(x_pos = 0; x_pos < NUM_OF_COLUMN; x_pos++)
+        {
+            position.X = x_pos;
+            position.Y = y_pos;
+            if (GetBoardPieceInformation(pBoard, position) == color)
+                returnCount++;
+        }
+    }
+    return returnCount;
+}
+
 PieceType GetBoardPieceInformation(int* pBoard, Position position)
 {
     return pBoard[position.Y * NUM_OF_COLUMN + position.X];
 }
 
-bool CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode)
+int CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode)
 {
     printf("ChekAndFliop called\n");
+    int returnFlipCount = 0;
     int indexDirection;
     bool isCheckCompleted = false;
     bool isPieceToBeFlipped = false;
@@ -199,17 +228,18 @@ bool CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode)
                 if (ifFlip)
                 {
                     pDirectionToFlip = &gDirections[indexDirection];
-                    FlipPiece(pBoard, piece, pDirectionToFlip);
+                    returnFlipCount += FlipPiece(pBoard, piece, pDirectionToFlip);
                     ifFlip = false;
                 }
             }
         }
     }
-    return isPieceToBeFlipped;
+    return returnFlipCount;
 }
 
-void FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip)
+int FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip)
 {
+    int returnFlipCount = 0;
     Piece flippedPiece;
     flippedPiece.position.X = piece.position.X + pDirectionToFlip->dX;
     flippedPiece.position.Y = piece.position.Y + pDirectionToFlip->dY;
@@ -219,5 +249,7 @@ void FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip)
         SetPiece(pBoard, flippedPiece);
         flippedPiece.position.X += pDirectionToFlip->dX;
         flippedPiece.position.Y += pDirectionToFlip->dY;
+        returnFlipCount++;
     }
+    return returnFlipCount;
 }

@@ -50,12 +50,15 @@ int* gpMasterBoard;
 void InitializeBoard(int* pBoard);
 void PutInitialPieces();
 void PrintBoard(int* pBorard);
+void PrintCount(int* pBoard);
 void SetPiece(int* pBoard, Piece piece);
 bool PlacePiece(int* pBoard, Piece piece, PlaceMode placeMode);
 PieceType GetBoardPieceInformation(int* pBoard, Position position);
-bool CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode);
+int CheckAndFlip(int *pBoard, Piece piece, FlipMode flipMode);
 void GetUserTurnPiece(int* pBoard, Piece* pPiece);
-void FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip);
+int FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip);
+int CountPiece(int* pBoard, PieceType color);
+
 
 Piece initialBlack0 = {{3,3}, BLACK};
 Piece initialBlack1 = {{4,4}, BLACK};
