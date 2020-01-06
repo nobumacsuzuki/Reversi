@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#pragma once
 
 #define NUM_OF_COLUMN 8
 #define NUM_OF_ROW 8
+#define NUM_DIRECTIONS 8
+#define ASCII_CODE_START_OF_ZERO 48
 
 typedef enum _PIECE_TYPE
 {
@@ -43,10 +43,6 @@ typedef struct _PIECE
     PieceType color;
 } Piece;
 
-char CharPiece[] = {'.', 'X', 'O'};
-
-int* gpMasterBoard;
-
 void InitializeBoard(int* pBoard);
 void PutInitialPieces();
 void PrintBoard(int* pBorard);
@@ -59,21 +55,10 @@ void GetUserTurnPiece(int* pBoard, Piece* pPiece);
 int FlipPiece(int* pBoard, Piece piece, Direction* pDirectionToFlip);
 int CountPiece(int* pBoard, PieceType color);
 
-
-Piece initialBlack0 = {{3,3}, BLACK};
-Piece initialBlack1 = {{4,4}, BLACK};
-Piece initialWhite0 = {{3,4}, WHITE};
-Piece initialWhite1 = {{4,3}, WHITE};
-Direction gDirections[] =
-{
-    {-1, -1},
-    {0, -1},
-    {1, -1},
-    {-1, 0},
-    {1, 0},
-    {-1,1},
-    {0, 1},
-    {1, 1}
-};
-#define NUM_DIRECTIONS 8
-#define ASCII_CODE_START_OF_ZERO 48
+extern int* gpMasterBoard;
+extern Piece initialBlack0;
+extern Piece initialBlack1;
+extern Piece initialWhite0;
+extern Piece initialWhite1;
+extern Direction gDirections[];
+extern char CharPiece[];
